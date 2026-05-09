@@ -1,64 +1,20 @@
-import { GoogleLogin } from '@react-oauth/google'
-import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/helpers'
-import toast from 'react-hot-toast'
+
 interface GoogleLoginButtonProps {
-  onSuccess: () => void
+  onSuccess?: () => void
 }
 
-export function GoogleLoginButton({ onSuccess }: GoogleLoginButtonProps) {
-  const { loginWithGoogle } = useAuth()
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+export function GoogleLoginButton({ onSuccess: _onSuccess }: GoogleLoginButtonProps) {
+  const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
 
-  const handleSuccess = async (credentialResponse: { credential?: string }) => {
-    if (!credentialResponse.credential) {
-      toast.error('Google authentication failed: no credential received')
-      return
-    }
-    try {
-      await loginWithGoogle(credentialResponse.credential)
-      toast.success('Signed in with Google')
-      onSuccess()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Google authentication failed')
-    }
-  }
+  // Use the backend's redirect-based OAuth flow.
+  // This is more reliable than the GIS iframe which often fails to
+  // receive click events inside flex layouts.
+  const googleAuthUrl = `${apiBase}/auth/google`
 
-  // When Google OAuth is configured, render the official Google button
-  if (clientId) {
-    return (
-      <div className="w-full">
-        {/* 
-          The GoogleLogin iframe requires a container with explicit dimensions
-          and position context to receive click events reliably inside flex layouts.
-        */}
-        <div className="relative flex min-h-[40px] w-full items-center justify-center">
-          <GoogleLogin
-            onSuccess={handleSuccess}
-            onError={() => {
-              toast.error('Google authentication failed')
-            }}
-            size="large"
-            width={320}
-            text="continue_with"
-            shape="rectangular"
-            logo_alignment="center"
-          />
-        </div>
-      </div>
-    )
-  }
-
-  // Fallback: render a styled button that explains configuration is needed
   return (
-    <button
-      type="button"
-      onClick={() =>
-        toast.error(
-          'Google OAuth not configured. Please set VITE_GOOGLE_CLIENT_ID in your .env file.',
-          { duration: 5000 }
-        )
-      }
+    <a
+      href={googleAuthUrl}
       className={cn(
         'flex w-full items-center justify-center gap-3 rounded-md border border-gray-300',
         'bg-white px-4 py-2.5 text-sm font-medium text-gray-700',
@@ -84,6 +40,6 @@ export function GoogleLoginButton({ onSuccess }: GoogleLoginButtonProps) {
         />
       </svg>
       Login or Register with Google
-    </button>
+    </a>
   )
 }

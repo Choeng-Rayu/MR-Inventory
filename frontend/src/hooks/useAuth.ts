@@ -14,6 +14,7 @@ export function useAuth() {
     loginWithGoogle: store.loginWithGoogle,
     loginWithTelegram: store.loginWithTelegram,
     logout: store.logout,
+    setAuth: store.setAuth,
     clearError: store.clearError,
   }
 }

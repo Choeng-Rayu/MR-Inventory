@@ -15,6 +15,7 @@ interface AuthState {
   loginWithGoogle: (token: string) => Promise<void>
   loginWithTelegram: (authData: Record<string, unknown>) => Promise<void>
   logout: () => Promise<void>
+  setAuth: (token: string, user: User) => void
   setUser: (user: User) => void
   setToken: (token: string) => void
   clearError: () => void
@@ -116,6 +117,13 @@ export const useAuthStore = create<AuthState>()(
           error: null,
         })
       },
+
+      setAuth: (token, user) =>
+        set({
+          token,
+          user,
+          isAuthenticated: true,
+        }),
 
       setUser: (user) => set({ user }),
       setToken: (token) => set({ token, isAuthenticated: true }),

@@ -1,4 +1,5 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -29,8 +30,22 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Get('google')
+  @ApiOperation({ summary: 'Redirect to Google OAuth consent screen' })
+  @ApiResponse({ status: 302, description: 'Redirects to Google OAuth' })
+  googleAuthRedirect(@Res() res: Response) {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const callbackUrl = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback';
+    const scope = encodeURIComponent('openid email profile');
+    const redirectUri = encodeURIComponent(callbackUrl);
+
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+
+    res.redirect(googleAuthUrl);
+  }
+
   @Post('google')
-  @ApiOperation({ summary: 'Login with Google OAuth' })
+  @ApiOperation({ summary: 'Login with Google OAuth (ID token flow)' })
   @ApiResponse({ status: 200, description: 'Google login successful' })
   @ApiResponse({ status: 401, description: 'Invalid Google token' })
   async googleLogin(@Body() dto: GoogleAuthDto) {

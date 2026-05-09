@@ -4,10 +4,13 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import helmet from 'helmet';
-import { json, urlencoded } from 'express';
+import { json, urlencoded, Request, Response } from 'express';
+import axios from 'axios';
 import { AppModule } from './app.module';
 import { runInitialSeeds } from './database/seeds/initial.seed';
 import { DataSource } from 'typeorm';
+import { User } from './common/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -93,6 +96,75 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  // REQ-2.1: Google OAuth callback handler (mounted outside /api prefix)
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.get('/auth/google/callback', async (req: Request, res: Response) => {
+    const code = req.query.code as string;
+    const error = req.query.error as string;
+
+    if (error || !code) {
+      return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
+    }
+
+    try {
+      // Exchange authorization code for tokens
+      const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+        code,
+        client_id: googleClientId,
+        client_secret: googleClientSecret,
+        redirect_uri: googleCallbackUrl,
+        grant_type: 'authorization_code',
+      });
+
+      const { id_token } = tokenResponse.data;
+
+      // Verify ID token
+      const tokenInfoResponse = await axios.get(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${id_token}`
+      );
+
+      const { email, name, picture, sub: googleId, aud } = tokenInfoResponse.data;
+
+      if (googleClientId && aud !== googleClientId) {
+        return res.redirect(`${frontendUrl}/login?error=invalid_token_audience`);
+      }
+
+      // Find or create user
+      const dataSource = app.get(DataSource);
+      const userRepository = dataSource.getRepository(User);
+
+      let user = await userRepository.findOne({ where: { email } });
+
+      if (!user) {
+        user = userRepository.create({
+          email,
+          name,
+          oauthProvider: 'google',
+          oauthId: googleId,
+          profilePicture: picture,
+        });
+      } else {
+        user.oauthId = googleId;
+        user.profilePicture = picture;
+      }
+      await userRepository.save(user);
+
+      // Generate JWT
+      const jwtService = app.get(JwtService);
+      const token = jwtService.sign({ sub: user.id, email: user.email });
+
+      // Redirect to frontend with token
+      res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
+    } catch (err) {
+      res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
+    }
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 

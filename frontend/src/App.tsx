@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { GoogleOAuthProvider } from '@react-oauth/google'
 import { ToastProvider } from '@/components/common/Toast'
 import { Layout } from '@/components/layout/Layout'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
@@ -9,6 +8,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
+import { OAuthCallbackPage } from '@/pages/OAuthCallbackPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ProductsPage } from '@/pages/ProductsPage'
 import { ProductDetailPage } from '@/pages/ProductDetailPage'
@@ -32,8 +32,6 @@ const queryClient = new QueryClient({
     },
   },
 })
-
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
 function AppRoutes() {
   return (
@@ -71,6 +69,7 @@ function AppRoutes() {
             </PublicRoute>
           }
         />
+        <Route path="/auth/callback" element={<OAuthCallbackPage />} />
         <Route
           element={
             <ProtectedRoute>
@@ -106,13 +105,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider />
-      {googleClientId ? (
-        <GoogleOAuthProvider clientId={googleClientId}>
-          <AppRoutes />
-        </GoogleOAuthProvider>
-      ) : (
-        <AppRoutes />
-      )}
+      <AppRoutes />
     </QueryClientProvider>
   )
 }

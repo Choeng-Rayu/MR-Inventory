@@ -10,7 +10,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -30,8 +30,8 @@ services:
     volumes:
       - minio_data:/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9002:9000"
+      - "9003:9001"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -66,7 +66,7 @@ services:
       FRONTEND_URL: http://localhost
       ENCRYPTION_KEY: your_encryption_key_32_chars_long
     ports:
-      - "3000:3000"
+      - "3010:3000"
     depends_on:
       mysql:
         condition: service_healthy

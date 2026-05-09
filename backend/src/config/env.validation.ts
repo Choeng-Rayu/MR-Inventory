@@ -65,6 +65,10 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
+  GOOGLE_CALLBACK_URL: string;
+
+  @IsString()
+  @IsOptional()
   TELEGRAM_BOT_TOKEN: string;
 
   @IsString()

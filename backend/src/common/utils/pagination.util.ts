@@ -1,9 +1,11 @@
 export interface PaginatedResult<T> {
   data: T[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasNext: boolean;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export function createPaginatedResult<T>(
@@ -15,9 +17,11 @@ export function createPaginatedResult<T>(
   const totalPages = Math.ceil(total / limit);
   return {
     data,
-    total,
-    page,
-    totalPages,
-    hasNext: page < totalPages,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
   };
 }
