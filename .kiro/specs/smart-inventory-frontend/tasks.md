@@ -4,7 +4,7 @@
 
 ### Phase 1: Project Setup and Foundation (Tasks 1-8)
 
-**Task 1: Project Setup and Infrastructure**
+**Task 1: Project Setup and Infrastructure** ✅
 - Initialize React + TypeScript + Vite project
 - Configure Tailwind CSS with custom theme
 - Install dependencies: React Router, Axios, React Query, Zustand, React Hook Form, Zod
@@ -12,14 +12,14 @@
 - Configure ESLint and Prettier
 - Create Dockerfile for production build
 
-**Task 2: API Client Configuration**
+**Task 2: API Client Configuration** ✅
 - Create Axios instance with base URL configuration
 - Implement request interceptor to attach JWT token from localStorage
 - Implement response interceptor to handle 401 errors and redirect to login
 - Create API service layer with typed endpoints matching backend API
 - Implement error handling utilities for API responses
 
-**Task 3: Authentication State Management**
+**Task 3: Authentication State Management** ✅
 - Create auth store using Zustand for user state and token management
 - Implement login function (POST /api/auth/login)
 - Implement logout function (POST /api/auth/logout, clear token)
@@ -27,31 +27,53 @@
 - Create ProtectedRoute component for authenticated routes
 - Create useAuth hook for accessing auth state
 
-**Task 4: Login Page - Email/Password**
+**Task 4: Login Page - Email/Password** ✅
 - Create login page UI with email and password inputs
 - Implement form validation using React Hook Form + Zod
 - Connect login form to auth API (POST /api/auth/login)
 - Display error messages for invalid credentials
 - Redirect to dashboard on successful login
 - Add "Remember me" checkbox for persistent session
+- Add "Forgot password?" and "Create an account" links
 
-**Task 5: Login Page - Google OAuth**
+**Task 4a: Registration Page** ✅
+- Create registration page with name, email, password, confirm password
+- Implement form validation with password matching
+- Connect to backend registration API (POST /api/auth/register)
+- Auto-login after successful registration
+- Support OAuth registration via Google/Telegram
+
+**Task 4b: Forgot Password Page** ✅
+- Create forgot password page with email input
+- Send OTP to user's email (POST /api/auth/forgot-password)
+- Show confirmation message after OTP sent
+- Link to reset password page
+
+**Task 4c: Reset Password Page** ✅
+- Create reset password page with email, OTP, new password, confirm password
+- Validate password match
+- Submit to backend (POST /api/auth/reset-password)
+- Redirect to login on success
+
+**Task 5: Login Page - Google OAuth** ✅
 - Install and configure @react-oauth/google
-- Add "Sign in with Google" button to login page
+- Add "Login or Register with Google" button
 - Implement Google OAuth callback handler
 - Send Google token to backend (POST /api/auth/google)
+- Backend auto-creates user if not exists (login or register)
 - Store JWT token on successful authentication
 - Handle OAuth errors with user-friendly messages
 
-**Task 6: Login Page - Telegram OAuth**
-- Install and configure Telegram Login Widget
-- Add "Sign in with Telegram" button to login page
+**Task 6: Login Page - Telegram OAuth** ✅
+- Install and configure Telegram Login Widget (legacy widget with hash verification)
+- Add "Login or Register with Telegram" button
 - Implement Telegram OAuth callback handler
-- Verify and send Telegram auth data to backend (POST /api/auth/telegram)
+- Send full auth data (id, first_name, last_name, username, photo_url, auth_date, hash) to backend
+- Backend verifies HMAC hash and auto-creates user if not exists
 - Store JWT token on successful authentication
 - Handle OAuth errors with user-friendly messages
 
-**Task 7: Layout and Navigation**
+**Task 7: Layout and Navigation** ✅
 - Create main layout component with header, sidebar, and content area
 - Implement responsive navigation menu (desktop sidebar, mobile hamburger)
 - Add navigation links: Dashboard, Products, Suppliers, Check-In, Check-Out, Inventory, Reports, Settings
@@ -59,7 +81,7 @@
 - Display user name and authentication method in header
 - Implement active route highlighting
 
-**Task 8: Notification Bell Component**
+**Task 8: Notification Bell Component** ✅
 - Create notification bell icon in header with unread count badge
 - Implement notification panel dropdown
 - Fetch notifications from API (GET /api/notifications)
@@ -70,7 +92,7 @@
 
 ### Phase 2: Dashboard (Tasks 9-12)
 
-**Task 9: Dashboard Metrics Cards**
+**Task 9: Dashboard Metrics Cards** ✅
 - Create dashboard page layout
 - Fetch dashboard metrics from API (GET /api/dashboard/metrics)
 - Display metric cards: Total Products, Low Stock Count, Near Expiry Count, Expired Count, Total Inventory Value
@@ -78,7 +100,7 @@
 - Add icons and color coding for each metric type
 - Auto-refresh metrics when navigating back to dashboard
 
-**Task 10: Dashboard Activity Feed**
+**Task 10: Dashboard Activity Feed** ✅
 - Create activity feed component showing recent transactions
 - Display 10 most recent check-in and check-out transactions
 - Show transaction type, product name, quantity, unit, user, and timestamp
@@ -86,7 +108,7 @@
 - Implement real-time updates (refresh every 5 seconds or on transaction)
 - Format timestamps as relative time (e.g., "2 hours ago")
 
-**Task 11: Dashboard Charts**
+**Task 11: Dashboard Charts** ⏳
 - Install chart library (recharts or chart.js)
 - Create inventory trend chart (quantity changes over 30 days)
 - Create category distribution pie/bar chart
@@ -95,7 +117,7 @@
 - Implement responsive chart sizing
 - Display "No data available" message when data is empty
 
-**Task 12: Dashboard Low Stock Alerts**
+**Task 12: Dashboard Low Stock Alerts** ✅
 - Fetch low stock products from API (GET /api/dashboard/low-stock)
 - Create low stock alert section on dashboard
 - Display product name, current quantity, threshold, and shortage amount
@@ -105,7 +127,7 @@
 
 ### Phase 3: Product Management (Tasks 13-18)
 
-**Task 13: Product List Page**
+**Task 13: Product List Page** ✅
 - Create product list page with table/grid view
 - Fetch products from API (GET /api/products?page=1&limit=20)
 - Display product name, category, barcode, image thumbnail, stock level
@@ -114,7 +136,7 @@
 - Add actions column with edit and delete buttons
 - Display low stock indicator badge on products
 
-**Task 14: Product Search and Filters**
+**Task 14: Product Search and Filters** ✅
 - Create search input with debounced API calls (300ms)
 - Implement search by name, barcode, or SKU
 - Create filter dropdowns for category, stock level, expiry status
@@ -122,7 +144,7 @@
 - Display filtered result count
 - Add "Clear filters" button to reset all filters
 
-**Task 15: Product Create/Edit Form**
+**Task 15: Product Create/Edit Form** ✅
 - Create product form with fields: name, category, barcode, description, base unit, low stock threshold
 - Implement form validation (required fields, unique barcode)
 - Add image upload with preview (max 5MB, JPEG/PNG/WebP)
@@ -131,7 +153,7 @@
 - Update product via API (PUT /api/products/:id)
 - Display success message and redirect to product list
 
-**Task 16: Product Unit Configuration**
+**Task 16: Product Unit Configuration** ✅
 - Add unit configuration section to product form
 - Display base unit (conversion rate = 1.0)
 - Allow adding multiple units with conversion rates
@@ -140,7 +162,7 @@
 - Prevent deletion of base unit
 - Save units with product creation/update
 
-**Task 17: Product Delete Confirmation**
+**Task 17: Product Delete Confirmation** ✅
 - Create confirmation dialog component
 - Show warning if product has associated batches
 - Display product name and impact of deletion
@@ -148,7 +170,7 @@
 - Remove product from list on successful deletion
 - Display error if deletion fails (e.g., has batches)
 
-**Task 18: Product Detail View**
+**Task 18: Product Detail View** ✅
 - Create product detail page showing all product information
 - Display product image, name, category, barcode, description
 - Show all configured units with conversion rates
@@ -158,7 +180,7 @@
 
 ### Phase 4: Category Management (Tasks 19-20)
 
-**Task 19: Category Management Interface**
+**Task 19: Category Management Interface** ✅
 - Create category management page in settings
 - Fetch categories from API (GET /api/categories)
 - Display category list with name, description, product count
@@ -167,7 +189,7 @@
 - Implement edit category form (PUT /api/categories/:id)
 - Display categories alphabetically
 
-**Task 20: Category Delete with Validation**
+**Task 20: Category Delete with Validation** ✅
 - Implement delete category with confirmation dialog
 - Check if category has associated products
 - Display warning if products exist in category
@@ -176,7 +198,7 @@
 
 ### Phase 5: Supplier Management (Tasks 21-23)
 
-**Task 21: Supplier List and CRUD**
+**Task 21: Supplier List and CRUD** ✅
 - Create supplier list page with table view
 - Fetch suppliers from API (GET /api/suppliers?page=1&limit=20)
 - Display supplier name, contact person, phone, email
@@ -185,13 +207,13 @@
 - Implement create (POST /api/suppliers), update (PUT /api/suppliers/:id), delete (DELETE /api/suppliers/:id)
 - Warn before deletion if supplier has batches
 
-**Task 22: Supplier Detail View**
+**Task 22: Supplier Detail View** ⏳
 - Create supplier detail page
 - Display supplier information (name, contact, phone, email, address)
 - Add edit and delete action buttons
 - Show inventory history section
 
-**Task 23: Supplier Inventory History**
+**Task 23: Supplier Inventory History** ⏳
 - Fetch supplier inventory from API (GET /api/suppliers/:id/inventory)
 - Display all batches from supplier with product name, batch code, import date, expiry date, quantity
 - Calculate and display total value of inventory from supplier
@@ -201,7 +223,7 @@
 
 ### Phase 6: Barcode Scanner (Tasks 24-25)
 
-**Task 24: Barcode Scanner Component**
+**Task 24: Barcode Scanner Component** ✅
 - Install barcode scanning library (react-zxing or html5-qrcode)
 - Create barcode scanner component with camera interface
 - Request camera permission from browser
@@ -210,7 +232,7 @@
 - Add manual barcode entry input as fallback
 - Optimize for mobile devices
 
-**Task 25: Barcode Product Lookup**
+**Task 25: Barcode Product Lookup** ✅
 - Implement product lookup by barcode (GET /api/products/barcode/:barcode)
 - Display product information when barcode found
 - Show "Product not found" message if no match
@@ -219,7 +241,7 @@
 
 ### Phase 7: Inventory Operations (Tasks 26-30)
 
-**Task 26: Check-In Page**
+**Task 26: Check-In Page** ✅
 - Create check-in page with barcode scanner integration
 - Scan or manually enter product barcode
 - Display product information after lookup
@@ -231,7 +253,7 @@
 - Display success message with batch code
 - Reset form for next check-in
 
-**Task 27: Check-Out Page**
+**Task 27: Check-Out Page** ✅
 - Create check-out page with barcode scanner integration
 - Scan or manually enter product barcode
 - Display product information and available quantity
@@ -242,7 +264,7 @@
 - Display success message with FIFO deduction details
 - Show error if insufficient stock
 
-**Task 28: FIFO Deduction Display**
+**Task 28: FIFO Deduction Display** ✅
 - Create component to display batch deductions after check-out
 - Show list of batches deducted (ordered by import date)
 - Display quantity deducted from each batch
@@ -250,7 +272,7 @@
 - Highlight batches that are fully depleted
 - Show total quantity deducted
 
-**Task 29: Batch List View**
+**Task 29: Batch List View** ✅
 - Create batch inventory page
 - Fetch batches from API (GET /api/batches)
 - Display batch code, product name, supplier, import date, expiry date, remaining quantity
@@ -259,7 +281,7 @@
 - Add visual indicators for near-expiry and expired batches
 - Implement pagination
 
-**Task 30: Batch Detail and Adjustment**
+**Task 30: Batch Detail and Adjustment** ✅
 - Create batch detail page
 - Display all batch information
 - Show transaction history for this batch
@@ -272,7 +294,7 @@
 
 ### Phase 8: Transaction History (Tasks 31-32)
 
-**Task 31: Transaction History Page**
+**Task 31: Transaction History Page** ✅
 - Create transaction history page
 - Fetch transactions from API (GET /api/transactions?page=1&limit=50)
 - Display transaction type, product name, quantity, unit, user, timestamp
@@ -281,7 +303,7 @@
 - Implement column sorting
 - Display in reverse chronological order
 
-**Task 32: Transaction Export**
+**Task 32: Transaction Export** ✅
 - Add export button to transaction history
 - Implement CSV export functionality
 - Fetch export data from API (GET /api/transactions with all filters)
@@ -291,7 +313,7 @@
 
 ### Phase 9: Expiry Management (Tasks 33-35)
 
-**Task 33: Near Expiry Alerts**
+**Task 33: Near Expiry Alerts** ✅
 - Create near expiry alerts page
 - Fetch near-expiry batches from API (filter by expiry date)
 - Display batch code, product name, expiry date, days until expiry, quantity
@@ -300,7 +322,7 @@
 - Display count on dashboard
 - Allow configuring Near_Expiry_Days threshold
 
-**Task 34: Expired Products View**
+**Task 34: Expired Products View** ✅
 - Create expired products page
 - Fetch expired batches from API (expiry date < today)
 - Display batch code, product name, expiry date, days since expiry, quantity
@@ -308,7 +330,7 @@
 - Display count on dashboard
 - Add filter to show/hide disposed batches
 
-**Task 35: Expiry Report**
+**Task 35: Expiry Report** ✅
 - Create expiry report page
 - Add date range selector
 - Fetch expiry report from API (GET /api/reports/expiry?from=&to=&format=json)
@@ -319,7 +341,7 @@
 
 ### Phase 10: Reports (Tasks 36-38)
 
-**Task 36: Inventory Summary Report**
+**Task 36: Inventory Summary Report** ✅
 - Create inventory summary report page
 - Fetch inventory report from API (GET /api/reports/inventory?format=json)
 - Display product name, category, total quantity, unit, value
@@ -328,7 +350,7 @@
 - Add category filter
 - Add export to CSV/Excel button
 
-**Task 37: Supplier Performance Report**
+**Task 37: Supplier Performance Report** ✅
 - Create supplier report page
 - Add date range selector
 - Fetch supplier report from API (GET /api/reports/supplier?from=&to=&format=json)
@@ -338,7 +360,7 @@
 - Allow drill-down to individual batches
 - Add export button
 
-**Task 38: Stock Movement Report**
+**Task 38: Stock Movement Report** ✅
 - Create stock movement report page
 - Add date range selector
 - Fetch transaction data grouped by product
@@ -350,7 +372,7 @@
 
 ### Phase 11: Settings and Configuration (Tasks 39-41)
 
-**Task 39: Settings Page**
+**Task 39: Settings Page** ✅
 - Create settings page with tabbed interface
 - Add General Settings tab: Near_Expiry_Days, default Low_Stock_Threshold
 - Add Notification Preferences tab: enable/disable notification types
@@ -360,7 +382,7 @@
 - Validate all inputs before submission
 - Display success message on save
 
-**Task 40: User Profile Page**
+**Task 40: User Profile Page** ✅
 - Create user profile page
 - Fetch user profile from API (GET /api/auth/profile)
 - Display user name, email, authentication method (email/Google/Telegram)
@@ -370,7 +392,7 @@
 - Submit profile update to API
 - Display success message
 
-**Task 41: Telegram Notification Test**
+**Task 41: Telegram Notification Test** ✅
 - Add "Send Test Notification" button in Telegram settings
 - Validate bot token and chat ID are configured
 - Send test notification request to API
@@ -379,14 +401,14 @@
 
 ### Phase 12: UI/UX Enhancements (Tasks 42-47)
 
-**Task 42: Loading States and Skeletons**
+**Task 42: Loading States and Skeletons** ✅
 - Create loading spinner component
 - Create skeleton loaders for tables, cards, and forms
 - Implement loading states for all API calls
 - Display "This is taking longer than expected" after 10 seconds
 - Add loading overlay for form submissions
 
-**Task 43: Error Handling and Feedback**
+**Task 43: Error Handling and Feedback** ✅
 - Create toast notification component for success/error messages
 - Implement global error boundary
 - Display user-friendly error messages for API errors
@@ -394,7 +416,7 @@
 - Display field-specific validation errors
 - Auto-dismiss success messages after 3 seconds
 
-**Task 44: Mobile Responsive Design**
+**Task 44: Mobile Responsive Design** ✅
 - Ensure all pages work on screens 320px and wider
 - Implement mobile navigation (hamburger menu)
 - Make all tables scrollable or stack on mobile
@@ -403,7 +425,7 @@
 - Test barcode scanner on mobile devices
 - Optimize image display for mobile
 
-**Task 45: Keyboard Navigation and Shortcuts**
+**Task 45: Keyboard Navigation and Shortcuts** ⏳
 - Implement Tab navigation through all interactive elements
 - Add Enter key to submit forms
 - Add Escape key to close modals
@@ -411,16 +433,16 @@
 - Create help dialog showing all shortcuts
 - Add visible focus indicators
 
-**Task 46: Accessibility Compliance**
+**Task 46: Accessibility Compliance** ✅
 - Add alt text to all images
 - Use semantic HTML elements
 - Add labels to all form inputs
-- Ensure color contrast ratio ≥ 4.5:1
+- Ensure color contrast ratio >= 4.5:1
 - Add ARIA labels to icon buttons
 - Test with screen reader
 - Ensure keyboard-only navigation works
 
-**Task 47: Offline Indicator**
+**Task 47: Offline Indicator** ⏳
 - Detect network connectivity status
 - Display offline banner when connection lost
 - Disable API-dependent actions while offline
@@ -430,7 +452,7 @@
 
 ### Phase 13: Performance and Optimization (Tasks 48-50)
 
-**Task 48: Performance Optimization**
+**Task 48: Performance Optimization** ✅
 - Implement code splitting with React.lazy
 - Add lazy loading for images
 - Implement React Query for API caching
@@ -439,14 +461,14 @@
 - Debounce search inputs (300ms)
 - Memoize expensive computations
 
-**Task 49: Image Optimization**
+**Task 49: Image Optimization** ✅
 - Implement image compression before upload
 - Add image preview before upload
 - Display placeholder images for missing product images
 - Lazy load images in product lists
 - Optimize image sizes for different screen sizes
 
-**Task 50: Production Build and Docker**
+**Task 50: Production Build and Docker** ✅
 - Configure Vite for production build
 - Optimize build output (minification, tree shaking)
 - Create production Dockerfile (multi-stage build)
@@ -456,7 +478,7 @@
 
 ### Phase 14: Testing and Documentation (Tasks 51-52)
 
-**Task 51: Component Testing**
+**Task 51: Component Testing** ⏳
 - Setup Vitest and React Testing Library
 - Write unit tests for utility functions
 - Write component tests for forms and validation
@@ -465,7 +487,7 @@
 - Test FIFO calculation display
 - Achieve >80% code coverage
 
-**Task 52: Documentation**
+**Task 52: Documentation** ⏳
 - Create README.md with setup instructions
 - Document environment variables
 - Document API integration points
@@ -476,7 +498,10 @@
 
 ---
 
-**Total Tasks: 52**
+**Total Tasks: 55**
+**Completed: 46**
+**In Progress / Partial: 3**
+**Pending: 6**
 
 **Estimated Timeline:**
 - Phase 1-2: 1-2 weeks (Foundation)

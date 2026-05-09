@@ -24,6 +24,13 @@ dist-ssr
 *.sw?
 
 
+# Environment variables
+.env
+.env.*
+!.env.example
 frontend/.env
+frontend/.env.*
+!frontend/.env.example
 backend/.env
-*.env
+backend/.env.*
+!backend/.env.example

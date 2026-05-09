@@ -1,0 +1,56 @@
+# Development Infrastructure Only
+# Run this to get MySQL + MinIO, then start backend and frontend manually.
+#
+# Usage:
+#   sudo docker compose -f docker-compose.dev.yml up -d
+#   cd backend && npm run start:dev
+#   cd frontend && npm run dev
+
+services:
+  inventory-mysql:
+    image: mysql:8.0
+    container_name: inventory-mysql-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: smart_inventory
+      MYSQL_USER: ${DB_USERNAME:-inventory}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-inventory_password}
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - inventory-dev-network
+
+  inventory-minio:
+    image: minio/minio:latest
+    container_name: inventory-minio-dev
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_dev_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - inventory-dev-network
+
+volumes:
+  mysql_dev_data:
+  minio_dev_data:
+
+networks:
+  inventory-dev-network:
+    driver: bridge

@@ -1,0 +1,103 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: inventory-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: smart_inventory
+      MYSQL_USER: inventory
+      MYSQL_PASSWORD: inventory_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - inventory-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: inventory-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - inventory-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inventory-backend
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: inventory-mysql
+      DB_PORT: 3306
+      DB_USERNAME: inventory
+      DB_PASSWORD: inventory_password
+      DB_DATABASE: smart_inventory
+      JWT_SECRET: your_jwt_secret_key_min_32_chars_long
+      JWT_EXPIRES_IN: 24h
+      MINIO_ENDPOINT: inventory-minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_PUBLIC_URL: http://localhost:9000
+      MINIO_BUCKET_NAME: inventory-images
+      FRONTEND_URL: http://localhost
+      ENCRYPTION_KEY: your_encryption_key_32_chars_long
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - inventory-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inventory-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - inventory-network
+
+volumes:
+  mysql_data:
+  minio_data:
+
+networks:
+  inventory-network:
+    driver: bridge
