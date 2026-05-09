@@ -21,15 +21,15 @@ export class DashboardMetricsDto {
 }
 
 export class LowStockDto {
-  @ApiProperty({ description: 'Product ID', example: 1 })
-  productId: number;
+  @ApiProperty({ description: 'Product ID', example: '1' })
+  id: string;
 
   @ApiProperty({ description: 'Product name', example: 'Coca Cola 330ml' })
-  productName: string;
+  name: string;
 
-  @ApiProperty({ description: 'Current quantity', example: 5 })
-  currentQuantity: number;
+  @ApiProperty({ description: 'Current stock quantity', example: 5 })
+  currentStock: number;
 
   @ApiProperty({ description: 'Low stock threshold', example: 10 })
-  threshold: number;
+  lowStockThreshold: number;
 }

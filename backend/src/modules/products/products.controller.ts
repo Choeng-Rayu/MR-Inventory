@@ -33,7 +33,8 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Product retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.findOne(id);
+    const product = await this.productsService.findOne(id);
+    return this.productsService.toResponse(product);
   }
 
   @Get('barcode/:barcode')
@@ -41,7 +42,8 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Product retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async findByBarcode(@Param('barcode') barcode: string) {
-    return this.productsService.findByBarcode(barcode);
+    const product = await this.productsService.findByBarcode(barcode);
+    return this.productsService.toResponse(product);
   }
 
   @Post()

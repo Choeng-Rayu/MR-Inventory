@@ -72,9 +72,11 @@ export class DashboardService {
     const result = await this.productRepository
       .createQueryBuilder('product')
       .leftJoin('product.batches', 'batch', 'batch.is_depleted = false')
-      .select('COUNT(DISTINCT product.id)', 'count')
+      .select('product.id', 'productId')
+      .addSelect('product.low_stock_threshold', 'threshold')
+      .addSelect('COALESCE(SUM(batch.quantity), 0)', 'currentQuantity')
       .groupBy('product.id')
-      .having('COALESCE(SUM(batch.quantity), 0) < product.low_stock_threshold')
+      .having('currentQuantity < threshold')
       .getRawMany();
 
     return result.length;
@@ -106,20 +108,20 @@ export class DashboardService {
     const products = await this.productRepository
       .createQueryBuilder('product')
       .leftJoin('product.batches', 'batch', 'batch.is_depleted = false')
-      .select('product.id', 'productId')
-      .addSelect('product.name', 'productName')
-      .addSelect('product.low_stock_threshold', 'threshold')
-      .addSelect('COALESCE(SUM(batch.quantity), 0)', 'currentQuantity')
+      .select('product.id', 'id')
+      .addSelect('product.name', 'name')
+      .addSelect('product.low_stock_threshold', 'lowStockThreshold')
+      .addSelect('COALESCE(SUM(batch.quantity), 0)', 'currentStock')
       .groupBy('product.id')
-      .having('currentQuantity < product.low_stock_threshold')
-      .orderBy('currentQuantity', 'ASC')
+      .having('currentStock < lowStockThreshold')
+      .orderBy('currentStock', 'ASC')
       .getRawMany();
 
     return products.map(p => ({
-      productId: p.productId,
-      productName: p.productName,
-      currentQuantity: parseFloat(p.currentQuantity) || 0,
-      threshold: parseFloat(p.threshold) || 0,
+      id: String(p.id),
+      name: p.name,
+      currentStock: parseFloat(p.currentStock) || 0,
+      lowStockThreshold: parseFloat(p.lowStockThreshold) || 0,
     }));
   }
 }

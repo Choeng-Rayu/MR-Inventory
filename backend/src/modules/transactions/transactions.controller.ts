@@ -18,6 +18,14 @@ export class TransactionsController {
     return this.transactionsService.findAll(query);
   }
 
+  @Get('recent')
+  @ApiOperation({ summary: 'Get recent transactions' })
+  @ApiResponse({ status: 200, description: 'Recent transactions retrieved successfully' })
+  async getRecent(@Query('limit') limit: string) {
+    const parsedLimit = parseInt(limit) || 10;
+    return this.transactionsService.getRecentTransactions(parsedLimit);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get transaction by ID' })
   @ApiResponse({ status: 200, description: 'Transaction retrieved successfully' })

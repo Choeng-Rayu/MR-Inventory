@@ -84,10 +84,22 @@ export class TransactionsService {
   }
 
   async getRecentTransactions(limit: number = 10) {
-    return this.transactionRepository.find({
-      relations: ['product', 'batch', 'user'],
+    const transactions = await this.transactionRepository.find({
+      relations: ['product', 'batch', 'user', 'unit'],
       take: limit,
       order: { timestamp: 'DESC' },
     });
+
+    // Transform to flat shape expected by frontend
+    return transactions.map(tx => ({
+      id: String(tx.id),
+      type: tx.type,
+      productName: tx.product?.name || '',
+      batchCode: tx.batch?.batchCode || '',
+      quantity: Number(tx.quantity),
+      unit: tx.unit?.unitName || '',
+      userName: tx.user?.name || '',
+      timestamp: tx.timestamp instanceof Date ? tx.timestamp.toISOString() : tx.timestamp,
+    }));
   }
 }

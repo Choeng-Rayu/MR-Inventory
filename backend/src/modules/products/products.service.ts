@@ -28,7 +28,7 @@ export class ProductsService {
       }
     }
 
-    const product = this.productRepository.create({
+    let product = this.productRepository.create({
       name: dto.name,
       sku: dto.sku,
       barcode: dto.barcode,
@@ -38,7 +38,14 @@ export class ProductsService {
       lowStockThreshold: dto.lowStockThreshold ?? 0,
     });
 
-    return this.productRepository.save(product);
+    product = await this.productRepository.save(product);
+
+    // Reload with category relation for consistent response shape
+    const saved = await this.productRepository.findOne({
+      where: { id: product.id },
+      relations: ['category'],
+    });
+    return this.toResponse(saved || product);
   }
 
   async findAll(dto: FindProductsDto) {
@@ -72,20 +79,31 @@ export class ProductsService {
       queryBuilder.getCount(),
     ]);
 
-    // Map raw quantities to entities
+    // Transform to frontend-compatible shape
     const data = products.entities.map((product, index) => {
       const raw = products.raw[index];
       return {
-        ...product,
-        totalQuantity: parseFloat(raw.total_quantity) || 0,
+        id: String(product.id),
+        name: product.name,
+        category: product.category?.name || '',
+        categoryId: product.categoryId ? String(product.categoryId) : undefined,
+        sku: product.sku,
+        barcode: product.barcode,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        lowStockThreshold: Number(product.lowStockThreshold) || 0,
+        baseUnit: product.baseUnit,
+        currentStock: parseFloat(raw.total_quantity) || 0,
+        createdAt: product.createdAt instanceof Date ? product.createdAt.toISOString() : product.createdAt,
+        updatedAt: product.updatedAt instanceof Date ? product.updatedAt.toISOString() : product.updatedAt,
       };
     });
 
     if (stockStatus) {
       const filtered = data.filter(p => {
-        if (stockStatus === 'out_of_stock') return p.totalQuantity === 0;
-        if (stockStatus === 'low_stock') return p.totalQuantity > 0 && p.totalQuantity < p.lowStockThreshold;
-        if (stockStatus === 'in_stock') return p.totalQuantity >= p.lowStockThreshold;
+        if (stockStatus === 'out_of_stock') return p.currentStock === 0;
+        if (stockStatus === 'low_stock') return p.currentStock > 0 && p.currentStock < p.lowStockThreshold;
+        if (stockStatus === 'in_stock') return p.currentStock >= p.lowStockThreshold;
         return true;
       });
       return createPaginatedResult(filtered, filtered.length, page, limit);
@@ -116,6 +134,25 @@ export class ProductsService {
     return product;
   }
 
+  toResponse(product: any) {
+    return {
+      id: String(product.id),
+      name: product.name,
+      category: product.category?.name || '',
+      categoryId: product.categoryId ? String(product.categoryId) : undefined,
+      sku: product.sku,
+      barcode: product.barcode,
+      description: product.description,
+      imageUrl: product.imageUrl,
+      lowStockThreshold: Number(product.lowStockThreshold) || 0,
+      baseUnit: product.baseUnit,
+      units: product.units || [],
+      currentStock: product.currentStock ?? 0,
+      createdAt: product.createdAt instanceof Date ? product.createdAt.toISOString() : product.createdAt,
+      updatedAt: product.updatedAt instanceof Date ? product.updatedAt.toISOString() : product.updatedAt,
+    };
+  }
+
   async update(id: number, dto: UpdateProductDto) {
     const product = await this.findOne(id);
 
@@ -136,7 +173,8 @@ export class ProductsService {
       lowStockThreshold: dto.lowStockThreshold ?? product.lowStockThreshold,
     });
 
-    return this.productRepository.save(product);
+    const saved = await this.productRepository.save(product);
+    return this.toResponse(saved);
   }
 
   async remove(id: number) {
