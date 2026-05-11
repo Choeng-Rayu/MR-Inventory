@@ -94,7 +94,7 @@ export function SuppliersPage() {
   }
 
   const suppliers = data?.data ?? []
-  const totalPages = data?.meta.totalPages ?? 1
+  const totalPages = data?.meta?.totalPages ?? 1
 
   return (
     <div className="space-y-6">

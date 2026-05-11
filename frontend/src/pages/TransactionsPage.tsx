@@ -59,7 +59,7 @@ export function TransactionsPage() {
   }
 
   const transactions = data?.data ?? []
-  const totalPages = data?.meta.totalPages ?? 1
+  const totalPages = data?.meta?.totalPages ?? 1
 
   const getTypeIcon = (type: string) => {
     switch (type) {

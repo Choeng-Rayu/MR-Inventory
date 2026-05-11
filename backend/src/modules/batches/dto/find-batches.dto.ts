@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsInt, IsDateString, Min } from 'class-validator';
+import { IsOptional, IsInt, IsDateString, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FindBatchesDto {
@@ -48,4 +48,9 @@ export class FindBatchesDto {
   @IsOptional()
   @IsDateString()
   importTo?: string;
+
+  @ApiProperty({ description: 'Filter by expiry status', example: 'all', required: false })
+  @IsOptional()
+  @IsString()
+  expiryStatus?: string;
 }

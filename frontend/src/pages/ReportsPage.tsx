@@ -104,7 +104,7 @@ export function ReportsPage() {
       )}
 
       {/* Inventory Report */}
-      {activeTab === 'inventory' && inventoryReport && (
+      {activeTab === 'inventory' && inventoryReport?.data && (
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Inventory Summary</h3>
@@ -195,7 +195,7 @@ export function ReportsPage() {
       )}
 
       {/* Supplier Report */}
-      {activeTab === 'supplier' && supplierReport && (
+      {activeTab === 'supplier' && supplierReport?.data && (
         <Card>
           <h3 className="mb-4 text-lg font-medium text-gray-900">Supplier Performance</h3>
           <div className="overflow-x-auto">
@@ -236,7 +236,7 @@ export function ReportsPage() {
       )}
 
       {/* Movement Report */}
-      {activeTab === 'movement' && movementReport && (
+      {activeTab === 'movement' && movementReport?.data && (
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Stock Movement</h3>

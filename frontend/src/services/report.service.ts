@@ -68,7 +68,7 @@ export const reportService = {
     data: SupplierReportItem[]
   }> {
     try {
-      const response = await api.get('/reports/supplier', { params })
+      const response = await api.get('/reports/supplier-performance', { params })
       return response.data
     } catch (error) {
       throw new Error(handleApiError(error as AxiosError))

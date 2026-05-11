@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, LessThan } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Product } from '../../common/entities/product.entity';
 import { Batch } from '../../common/entities/batch.entity';
 import { Supplier } from '../../common/entities/supplier.entity';
@@ -34,20 +34,28 @@ export class ReportsService {
       ? batches.filter(b => b.product?.categoryId === categoryId)
       : batches;
 
-    const grouped = filtered.reduce((acc, batch) => {
-      const catName = batch.product?.category?.name || 'Uncategorized';
-      if (!acc[catName]) {
-        acc[catName] = { batches: [], totalValue: 0, totalQuantity: 0 };
+    const productMap = new Map();
+    for (const batch of filtered) {
+      const pid = batch.productId;
+      if (!productMap.has(pid)) {
+        productMap.set(pid, {
+          productId: String(pid),
+          productName: batch.product?.name || 'Unknown',
+          category: batch.product?.category?.name || 'Uncategorized',
+          totalQuantity: 0,
+          unit: batch.product?.baseUnit || 'unit',
+          value: 0,
+        });
       }
-      acc[catName].batches.push(batch);
-      acc[catName].totalValue += Number(batch.quantity) * Number(batch.unitCost);
-      acc[catName].totalQuantity += Number(batch.quantity);
-      return acc;
-    }, {});
+      const item = productMap.get(pid);
+      item.totalQuantity += Number(batch.quantity);
+      item.value += Number(batch.quantity) * Number(batch.unitCost);
+    }
 
-    const totalValue = filtered.reduce((sum, b) => sum + (Number(b.quantity) * Number(b.unitCost)), 0);
+    const data = Array.from(productMap.values());
+    const totalValue = data.reduce((sum, item) => sum + item.value, 0);
 
-    return { grouped, totalValue, totalBatches: filtered.length };
+    return { data, totalValue };
   }
 
   async generateExpiryReport(startDate?: Date, endDate?: Date) {
@@ -61,32 +69,33 @@ export class ReportsService {
     });
 
     const now = new Date();
-    const groups = {
-      expired: [] as typeof batches,
-      within7Days: [] as typeof batches,
-      within30Days: [] as typeof batches,
-      within90Days: [] as typeof batches,
-    };
+    const expired: any[] = [];
+    const nearExpiry7d: any[] = [];
+    const nearExpiry30d: any[] = [];
+    const nearExpiry90d: any[] = [];
 
     for (const batch of batches) {
       if (!batch.expiryDate) continue;
       const days = Math.ceil((batch.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-      if (days < 0) groups.expired.push(batch);
-      else if (days <= 7) groups.within7Days.push(batch);
-      else if (days <= 30) groups.within30Days.push(batch);
-      else if (days <= 90) groups.within90Days.push(batch);
+      const item = {
+        batchCode: batch.batchCode,
+        productName: batch.product?.name || 'Unknown',
+        supplier: batch.supplier?.name || 'Unknown',
+        quantity: Number(batch.quantity),
+        expiryDate: batch.expiryDate.toISOString(),
+        daysUntilExpiry: days,
+      };
+
+      if (days < 0) expired.push(item);
+      else if (days <= 7) nearExpiry7d.push(item);
+      else if (days <= 30) nearExpiry30d.push(item);
+      else if (days <= 90) nearExpiry90d.push(item);
     }
 
-    const calculateValue = (batches: typeof groups.expired) =>
-      batches.reduce((sum, b) => sum + (Number(b.quantity) * Number(b.unitCost)), 0);
+    const totalValue = batches.reduce((sum, b) => sum + (Number(b.quantity) * Number(b.unitCost)), 0);
 
-    return {
-      expired: { batches: groups.expired, totalValue: calculateValue(groups.expired) },
-      within7Days: { batches: groups.within7Days, totalValue: calculateValue(groups.within7Days) },
-      within30Days: { batches: groups.within30Days, totalValue: calculateValue(groups.within30Days) },
-      within90Days: { batches: groups.within90Days, totalValue: calculateValue(groups.within90Days) },
-    };
+    return { expired, nearExpiry7d, nearExpiry30d, nearExpiry90d, totalValue };
   }
 
   async generateSupplierPerformanceReport(supplierId?: number, startDate?: Date, endDate?: Date) {
@@ -104,23 +113,72 @@ export class ReportsService {
       const sid = batch.supplierId;
       if (!acc[sid]) {
         acc[sid] = {
-          supplier: batch.supplier,
-          batches: [],
+          supplierId: String(sid),
+          supplierName: batch.supplier?.name || 'Unknown',
+          totalBatches: 0,
           totalQuantity: 0,
           totalValue: 0,
-          expiredCount: 0,
         };
       }
-      acc[sid].batches.push(batch);
+      acc[sid].totalBatches++;
       acc[sid].totalQuantity += Number(batch.quantity);
       acc[sid].totalValue += Number(batch.quantity) * Number(batch.unitCost);
-      if (batch.expiryDate && batch.expiryDate < new Date()) {
-        acc[sid].expiredCount++;
-      }
       return acc;
     }, {});
 
-    return Object.values(grouped);
+    const data: any[] = Object.values(grouped);
+    const grandTotalValue = data.reduce((sum, item: any) => sum + item.totalValue, 0);
+
+    for (const item of data) {
+      item.percentageOfTotal = grandTotalValue > 0 ? (item.totalValue / grandTotalValue) * 100 : 0;
+    }
+
+    return { data };
+  }
+
+  async generateStockMovementReport(startDate?: Date, endDate?: Date) {
+    const where: any = {};
+    if (startDate && endDate) {
+      where.timestamp = Between(startDate, endDate);
+    }
+
+    const transactions = await this.transactionRepository.find({
+      where,
+      relations: ['product'],
+      order: { timestamp: 'DESC' },
+    });
+
+    const productMap = new Map();
+    let totalCheckIn = 0;
+    let totalCheckOut = 0;
+
+    for (const tx of transactions) {
+      const pid = tx.productId;
+      if (!productMap.has(pid)) {
+        productMap.set(pid, {
+          productId: String(pid),
+          productName: tx.product?.name || 'Unknown',
+          checkInQuantity: 0,
+          checkOutQuantity: 0,
+          netChange: 0,
+        });
+      }
+      const item = productMap.get(pid);
+      if (tx.type === 'check_in') {
+        item.checkInQuantity += Number(tx.quantity);
+        totalCheckIn += Number(tx.quantity);
+      } else if (tx.type === 'check_out') {
+        item.checkOutQuantity += Number(tx.quantity);
+        totalCheckOut += Number(tx.quantity);
+      }
+    }
+
+    const data = Array.from(productMap.values()).map(item => ({
+      ...item,
+      netChange: item.checkInQuantity - item.checkOutQuantity,
+    }));
+
+    return { data, totalCheckIn, totalCheckOut };
   }
 
   convertToCsv(data: any[], headers: string[]): string {

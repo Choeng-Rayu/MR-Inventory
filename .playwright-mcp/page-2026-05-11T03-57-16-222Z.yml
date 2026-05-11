@@ -1,0 +1,58 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]: Smart Inventory
+      - navigation [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e10]
+          - text: Dashboard
+        - link "Products" [ref=e15] [cursor=pointer]:
+          - /url: /products
+          - img [ref=e16]
+          - text: Products
+        - link "Suppliers" [ref=e20] [cursor=pointer]:
+          - /url: /suppliers
+          - img [ref=e21]
+          - text: Suppliers
+        - link "Check-In" [ref=e26] [cursor=pointer]:
+          - /url: /check-in
+          - img [ref=e27]
+          - text: Check-In
+        - link "Check-Out" [ref=e30] [cursor=pointer]:
+          - /url: /check-out
+          - img [ref=e31]
+          - text: Check-Out
+        - link "Inventory" [ref=e34] [cursor=pointer]:
+          - /url: /inventory/batches
+          - img [ref=e35]
+          - text: Inventory
+        - link "Transactions" [ref=e38] [cursor=pointer]:
+          - /url: /transactions
+          - img [ref=e39]
+          - text: Transactions
+        - link "Expiry Alerts" [ref=e43] [cursor=pointer]:
+          - /url: /expiry-alerts
+          - img [ref=e44]
+          - text: Expiry Alerts
+        - link "Reports" [ref=e46] [cursor=pointer]:
+          - /url: /reports/inventory
+          - img [ref=e47]
+          - text: Reports
+        - link "Settings" [ref=e49] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e50]
+          - text: Settings
+      - paragraph [ref=e54]: Smart Inventory
+  - generic [ref=e55]:
+    - banner [ref=e56]:
+      - button "Open menu" [ref=e58]:
+        - img [ref=e59]
+      - generic [ref=e60]:
+        - button "Notifications" [ref=e62]:
+          - img [ref=e63]
+        - button "System Administrator" [ref=e67]:
+          - img [ref=e69]
+          - generic [ref=e72]: System Administrator
+          - img [ref=e73]
+    - main [ref=e75]

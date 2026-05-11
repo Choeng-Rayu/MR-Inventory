@@ -37,7 +37,7 @@ export class AuthService {
 
     await this.userRepository.save(user);
     const token = this.generateToken(user);
-    return { accessToken: token, user };
+    return { token, user };
   }
 
   // REQ-1.1: Verify credentials
@@ -53,7 +53,7 @@ export class AuthService {
     }
 
     const token = this.generateToken(user);
-    return { accessToken: token, user };
+    return { token, user };
   }
 
   // REQ-2: Google OAuth
@@ -80,7 +80,7 @@ export class AuthService {
     }
 
     const token = this.generateToken(user);
-    return { accessToken: token, user };
+    return { token, user };
   }
 
   // REQ-3: Telegram OAuth
@@ -111,7 +111,7 @@ export class AuthService {
     }
 
     const token = this.generateToken(user);
-    return { accessToken: token, user };
+    return { token, user };
   }
 
   async logout() {
